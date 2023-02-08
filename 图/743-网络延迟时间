@@ -1,0 +1,95 @@
+题目: https://leetcode.cn/problems/network-delay-time/description/
+
+解法1:
+使用Dijkstra算法
+根据题意，从节点 k发出的信号，到达节点 x的时间就是节点 k到节点 x的最短路的长度。
+因此我们需要求出节点 k到其余所有点的最短路，其中的最大值就是答案。若存在从 k出发无法到达的点，则返回 −1
+
+
+Dijkstra算法:
+Dijkstra算法是一种用于计算单源最短路径的算法。它是基于贪心策略的，每一次选择当前与源点最近的顶点，然后对这个顶点相邻的其他顶点进行松弛操作，更新它们的距离。
+
+算法的步骤如下：
+初始化：将源点的距离设为0，其他顶点的距离设为无穷大。
+创建一个未确定的点集，并将所有顶点加入其中。
+从未确定的点集中选择距离源点最近的点，并将其从点集中删除。
+对选择的点的相邻点进行松弛操作，更新它们的距离。
+重复步骤3和4，直到未确定的点集为空。
+Dijkstra算法的复杂度为O(n^2)，在实际使用中，为了加速搜索，常常使用堆数据结构来实现。
+
+松弛操作:
+是Dijkstra算法的核心操作。它的目的是更新顶点的最短路径。
+在Dijkstra算法中，对于一条从顶点u到顶点v的边，
+我们通过判断从起点到顶点u的距离与边的权值的和，
+是否比从起点到顶点v的距离更短，来决定是否要更新v的最短路径。
+如果更新了，这就叫做"松弛操作"。
+
+具体地，在代码实现中，通常用一个if语句来实现，如下：
+if dist[u] + graph[u][v] < dist[v] {
+    dist[v] = dist[u] + graph[u][v]
+}
+
+
+Dijkstra算法代码:
+package main
+
+import (
+	"math"
+	"fmt"
+)
+
+// 定义邻接矩阵
+var graph [][]int = [][]int{
+	{0, 4, 0, 0, 0, 0, 0, 8, 0},
+	{4, 0, 8, 0, 0, 0, 0, 11, 0},
+	{0, 8, 0, 7, 0, 4, 0, 0, 2},
+	{0, 0, 7, 0, 9, 14, 0, 0, 0},
+	{0, 0, 0, 9, 0, 10, 0, 0, 0},
+	{0, 0, 4, 14, 10, 0, 2, 0, 0},
+	{0, 0, 0, 0, 0, 2, 0, 1, 6},
+	{8, 11, 0, 0, 0, 0, 1, 0, 7},
+	{0, 0, 2, 0, 0, 0, 6, 7, 0},
+}
+
+const MAX = math.MaxInt32
+
+func dijkstra(graph [][]int, start int, end int) int {
+	n := len(graph)
+	dist := make([]int, n)
+	for i := 0; i < n; i++ {
+		dist[i] = MAX
+	}
+	dist[start] = 0
+
+	visited := make([]bool, n)
+	for i := 0; i < n; i++ {
+		visited[i] = false
+	}
+
+	for i := 0; i < n; i++ {
+		u := getMin(dist, visited)
+		visited[u] = true
+		for v := 0; v < n; v++ {
+			if !visited[v] && graph[u][v] != 0 && dist[u] != MAX && dist[u]+graph[u][v] < dist[v] {
+				dist[v] = dist[u] + graph[u][v]
+			}
+		}
+	}
+	return dist[end]
+}
+
+func getMin(dist []int, visited []bool) int {
+	min := MAX
+	minIndex := 0
+	for i := 0; i < len(dist); i++ {
+		if !visited[i] && dist[i] < min {
+			min = dist[i]
+			minIndex = i
+		}
+	}
+	return minIndex
+}
+
+func main() {
+	fmt.Println("最短路径长度为:", dijkstra(graph, 0, 8))
+}
