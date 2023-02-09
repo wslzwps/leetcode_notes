@@ -1,0 +1,51 @@
+题目链接: https://leetcode.cn/problems/redundant-connection/
+
+
+解题要求:
+  1: 请找出一条可以删去的边，删除后可使得剩余部分是一个有着 n 个节点的树。
+  2: 如果有多个答案，则返回数组 edges 中最后出现的边
+
+解题思路:
+  使用并查集
+  1: 初始化并查集
+  2: 遍历edges(保证了要求2), 如果两个节点的根节点相同(属于相同的联通分量), 则说明这条边是冗余边, 返回该边
+  3: 如果两个节点的根节点不同, 则将两个节点合并到同一个联通分量中
+  4: 步骤2,3循环结束后, 说明没有冗余边, 返回空数组
+
+代码:
+func findRedundantConnection(edges [][]int) []int {
+    parents:=make([]int,len(edges)+1)
+    for i:=0;i<len(parents);i++ {
+        parents[i]=i
+    }
+
+    var find func(x int)int
+    find=func(x int)int{
+        if parents[x]!=x {
+            parents[x] = find(parents[x])
+        }
+
+        return parents[x]
+    } 
+
+    union := func(x,y int)bool{
+        rootX:=find(x)
+        rootY:=find(y)
+
+        if rootX == rootY {
+            return false
+        }
+
+        parents[rootX] = rootY
+
+        return true
+    }
+
+    for _,val:=range edges {
+        if !union(val[0],val[1]) {
+            return val
+        }
+    }
+
+    return nil
+}
