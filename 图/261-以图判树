@@ -1,0 +1,57 @@
+题目链接: https://leetcode.cn/problems/graph-valid-tree/?envType=study-plan&id=graph-theory-advanced&plan=graph&plan_progress=jhbb0z5
+
+题目描述: 给定 n 个节点，标记为 0 到 n - 1，和一个无向边列表（每条边以一对节点表示），请编写一个函数用来判断这些边是否能够形成一个合法有效的树结构。
+
+解法1: 使用并查集来解决的，
+1:首先我们需要判断边的数量是否等于节点的数量减一，如果不等于，那么就不是一棵树，
+2:如果等于，那么我们就可以使用并查集来判断是否是一棵树了。
+3:我们首先初始化并查集，然后遍历边，如果两个节点的根节点不相同，那么就合并两个节点，
+4:如果两个节点的根节点相同，那么就说明这两个节点已经在一棵树上了，那么就不是一棵树了，
+5:最后我们判断并查集中的根节点的数量是否等于一，如果等于一，那么就是一棵树，否则就不是一棵树。
+
+解法2: 使用深度优先搜索来解决的。
+1:对每个节点执行深度优先遍历，遍历时我们需要记录子节点的父节点。
+2:如果子节点未访问，那么就访问子节点，并设置子节点的父节点。
+3:如果子节点已访问，判断当前节点有父节点，并且父节点是其子节点，否则说明有环。
+4:如果无环，并且边的数量等于节点的数量减一，那么就是一棵树，否则就不是一棵树。
+
+func validTree(n int, edges [][]int) bool {
+    visited:=make(map[int]bool)
+    hasCycle:=false
+    adj:=make([][]int,n)
+    firstVisitedParent:=make(map[int]int)
+    
+    for i:=0;i<len(adj);i++{
+        adj[i]=make([]int,0)
+        firstVisitedParent[i]=-1
+    }
+
+    for _,val:=range edges {
+        adj[val[0]]=append(adj[val[0]], val[1])
+        adj[val[1]]=append(adj[val[1]], val[0])
+    }
+
+    var dfs func(v int)
+
+    dfs = func(v int){
+        visited[v] = true
+        for _,val:=range adj[v]{
+            if !visited[val]{
+                dfs(val)
+                firstVisitedParent[val]=v  
+            }else if firstVisitedParent[val] != -1 && firstVisitedParent[v] !=val {
+                hasCycle = true
+                return 
+            }
+            
+        }
+    }
+
+    for i:=0;i<len(adj);i++{
+        if !visited[i] {
+            dfs(i)
+        }
+    }
+
+    return !hasCycle && len(edges)==n-1
+}
